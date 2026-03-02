@@ -157,75 +157,13 @@ void ensure_models_directory(const std::string& exe_dir) {
     }
 }
 
-///@brief handle_user_input is used to handle the user input
-///@param quiet if true, suppresses printing prompts
-void handle_user_input(bool sub_process_mode) {
-    bool stdin_is_interactive = false;
-#ifdef _WIN32
-    stdin_is_interactive = (_isatty(_fileno(stdin)) != 0);
-#else
-    stdin_is_interactive = (::isatty(STDIN_FILENO) != 0);
-#endif
-
-    std::istream* input_stream = &std::cin;
-    std::ifstream tty_stream;
-
-    if (!stdin_is_interactive) {
-#ifdef _WIN32
-        tty_stream.open("CONIN$");
-#else
-        tty_stream.open("/dev/tty");
-#endif
-        if (tty_stream.is_open()) {
-            input_stream = &tty_stream;
-            if (!sub_process_mode) {
-                header_print_r("FLM", "STDIN is not interactive. Listening for commands from terminal.");
-            }
-        }
-        else {
-            if (!sub_process_mode) {
-                header_print_r("FLM", "STDIN is not interactive and no terminal is available. Command input disabled; server remains running.");
-            }
-            while (!should_exit) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(250));
-            }
-            return;
-        }
-    }
-
-    std::string input;
-    bool prompt_shown = false;
-    bool eof_notified = false;
-    while (!should_exit) {
-        if (!sub_process_mode && !prompt_shown){
-            header_print("FLM", "Enter 'exit' or use 'Ctrl+C' to stop the server: ");
-            prompt_shown = true;
-        }
-
-        if (!std::getline(*input_stream, input)) {
-            if (input_stream->eof()) {
-                if (!sub_process_mode && !eof_notified) {
-                    header_print("FLM", "EOF detected. Server continues running; type 'exit' when input is available.");
-                    eof_notified = true;
-                }
-            }
-            else if (!sub_process_mode) {
-                header_print_r("FLM", "Input stream error detected. Retrying input.");
-            }
-
-            input_stream->clear();
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
-        }
-
-        prompt_shown = false;
-        eof_notified = false;
-
-        if (input == "exit") {
-            should_exit = true;
-            exit_cv.notify_all();
-            break;
-        }
+std::atomic<bool> running(true);
+std::condition_variable cv;
+std::mutex mtx;
+void signal_handler(int signal) {
+    if (signal == SIGINT) {
+        running = false;
+        cv.notify_one();
     }
 }
 
@@ -670,20 +608,13 @@ int main(int argc, char* argv[]) {
             // Start the server
             header_print("FLM", "Starting server on port " << port << "...");
             server->start();
-
-            // Start a thread to handle user input, this thread will be used to handle the user input
-            std::thread input_thread(handle_user_input, parsed_args.sub_process_mode);
-
-            // Wait for exit signal without polling to reduce CPU usage
+            header_print("FLM", "Press Ctrl+C to stop.");
             {
-                std::unique_lock<std::mutex> lock(exit_mutex);
-                exit_cv.wait(lock, [] { return should_exit.load(); });
+                std::unique_lock<std::mutex> lock(mtx);
+                cv.wait(lock, [] { return !running.load(); });
             }
-
-            // Cleanup, this will be used to stop the server
-            header_print("FLM", "Stopping server...");
-            server->stop();
-            input_thread.join();
+            // header_print("FLM", "Stopping server...");
+            // server->stop();
         }
         else if (parsed_args.command == "pull") {
             // Check if the model is already downloaded, if true, the model will not be downloaded
