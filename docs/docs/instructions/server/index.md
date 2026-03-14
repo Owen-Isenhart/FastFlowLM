@@ -20,6 +20,33 @@ You can choose to change the server port (default is 52625) by going to **System
 
 > ⚠️ **Be cautious**: If you update this value, be sure to change any higher-level port settings in your application as well to ensure everything works correctly.
 
+## NPU Model Loading Behavior
+
+FLM can keep one NPU model loaded per type at a time:
+
+- `asr`
+- `llm`
+- `embedding`
+
+Different model types can run together (for example, one LLM and one embedding model).
+
+### Load all three model types in one server process (default port)
+
+```shell
+flm serve lfm2:1.2b -e 1 -a 1
+```
+
+### Run model types in separate server processes (different ports)
+
+```shell
+flm serve -e 1 --port 52625
+flm serve -a 1 --port 52627
+flm serve lfm2:1.2b --port 52628
+```
+
+
+
+
 ## Set Context Length at Launch
 
 The default context length for each model can be found [here](https://fastflowlm.com/docs/models/). 
