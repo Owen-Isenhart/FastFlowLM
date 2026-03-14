@@ -31,7 +31,7 @@ void Qwen3_5VL::load_model(std::string model_path, json model_info, int default_
     config.top_k = 20;
     config.top_p = 0.95;
     config.min_p = 0.0;
-    config.temperature = 0.8;
+    config.temperature = 1.0;
     config.rep_penalty = 1.05;
     config.freq_penalty = 1.05;
     config.pre_penalty = 1.5f;
@@ -59,7 +59,7 @@ std::string Qwen3_5VL::apply_chat_template(nlohmann::ordered_json& messages, nlo
 
 bool Qwen3_5VL::insert(chat_meta_info_t& meta_info, lm_uniform_input_t& input) {
     // preprocess
-    constexpr int image_soft_token_id = 151655;
+    constexpr int image_soft_token_id = 248056;
     this->profiler_list[TKOEN_ENCODE_TIME].start();
     std::string templated_text;
     if (input.messages.empty() && input.prompt.empty()) {

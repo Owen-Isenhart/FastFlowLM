@@ -24,6 +24,8 @@
 class Qwen3_5VL : public AutoModel {
 private:
 
+    bool enable_think = false;
+    // bool enable_tool = false;
     void setup_tokenizer(std::string model_path);
     
     // Image processing functionality
@@ -60,15 +62,27 @@ public:
 	/// \param value the value to set (can be any type)
 	/// \return true if the parameter was configured successfully, false otherwise
 	bool configure_parameter(std::string parameter_name, const std::any& value) override{
-		if (parameter_name == "system_prompt") {
-			try {
-				this->user_system_prompt = std::any_cast<std::string>(value);
-				this->extra_context["user_system_prompt"] = this->user_system_prompt;
-				return true;
-			} catch (const std::bad_any_cast&) {
-				return false;
-			}
-		}
+        if (parameter_name == "enable_think") {
+            try {
+                this->enable_think = std::any_cast<bool>(value);
+                return true;
+            } catch (const std::bad_any_cast&) {
+                return false;
+            }
+        }
+        else if (parameter_name == "toggle_think") {
+            this->enable_think = !this->enable_think;
+            return true;
+        }
+        else if (parameter_name == "system_prompt") {
+            try {
+                this->user_system_prompt = std::any_cast<std::string>(value);
+                this->extra_context["user_system_prompt"] = this->user_system_prompt;
+                return true;
+            } catch (const std::bad_any_cast&) {
+                return false;
+            }
+        }
         else if (parameter_name == "img_pre_resize") {
             try {
                 this->image_pre_resize = std::any_cast<int>(value);
