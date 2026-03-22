@@ -8,6 +8,9 @@
 
 #include "typedef.hpp"
 #include <deque>
+#include <random>
+#include <chrono>
+#include <unordered_map>
 
 /// \brief sampler config
 /// \param temperature the temperature
@@ -60,6 +63,11 @@ public:
     size_t freq_penalty_window;
     size_t rep_penalty_window;
     size_t repeat_last_n;
+    
+    std::unordered_map<int, int> token_counts_sparse;
+    
+    std::mt19937_64 rng_;
+    std::uniform_real_distribution<float> uniform_dist_;
 
     /// \brief Constructor
     /// \param in_features the input features
@@ -76,13 +84,19 @@ public:
     void reset_penalties();
 
     void softmax_inplace();
+    void softmax_with_topp_minp(float top_p_threshold, float min_p_threshold);
+    
     void sampler_penalty_apply();
+    void sampler_penalty_apply_sparse();
+    
     void sampler_topk_apply(int k);
     void sampler_topp_apply(float p);
     void sampler_minp_apply(float p);
     void sampler_temp_apply(float temp);
     int sample_from_probs();
     void ring_buffer_update(int sampled_index);
+    void ring_buffer_update_sparse(int sampled_index);
+    
     /// \brief Sample the token
     /// \param x the input buffer
     /// \return the sampled token
