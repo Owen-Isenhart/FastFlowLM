@@ -9,10 +9,9 @@
 #include "modules/sampler.hpp"
 
 #include <deque>
-#include <cstdlib>    // for std::rand, std::srand, RAND_MAX
-#include <ctime>      // for std::time
 #include <algorithm>  // for std::sort
 #include <cmath>      // for std::exp
+#include <limits>
 
 /// \brief Constructor
 /// \param in_features the input features
@@ -36,15 +35,23 @@ Sampler::Sampler(int in_features, sampler_config& config) {
     this->rep_penalty_window    = config.rep_penalty_window;
     this->freq_penalty_window   = config.freq_penalty_window;
     this->repeat_last_n        = config.repeat_last_n;
+    this->use_optimized_sampling = config.use_optimized_sampling;
 
     this->token_history.clear();
-    
-    // Initialize PRNG with high-resolution clock
-    auto seed = std::chrono::high_resolution_clock::now()
-                    .time_since_epoch()
-                    .count();
-    rng_.seed(static_cast<uint64_t>(seed));
+
+    if (config.rng_seed != 0) {
+        rng_.seed(config.rng_seed);
+    } else {
+        auto seed = std::chrono::high_resolution_clock::now()
+                        .time_since_epoch()
+                        .count();
+        rng_.seed(static_cast<uint64_t>(seed));
+    }
     uniform_dist_ = std::uniform_real_distribution<float>(0.0f, 1.0f);
+}
+
+void Sampler::set_seed(uint64_t seed) {
+    rng_.seed(seed);
 }
 
 /// \brief Reset the penalties
@@ -360,10 +367,20 @@ int Sampler::sample(buffer<bf16>& x) {
     }
     #endif
 
-    sampler_penalty_apply_sparse();    
+    sampler_penalty_apply_sparse();
     sampler_topk_apply(this->top_k);
-    sampler_temp_apply(this->temperature);
-    softmax_with_topp_minp(this->top_p, this->min_p);
+    if (this->use_optimized_sampling) {
+        sampler_temp_apply(this->temperature);
+        softmax_with_topp_minp(this->top_p, this->min_p);
+    } else {
+        // Legacy behavior is kept as the default for output compatibility.
+        softmax_inplace();
+        sampler_topp_apply(this->top_p);
+        softmax_inplace();
+        sampler_minp_apply(this->min_p);
+        sampler_temp_apply(this->temperature);
+        softmax_inplace();
+    }
 
     int sampled_index = sample_from_probs();
     ring_buffer_update_sparse(sampled_index);

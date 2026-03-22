@@ -7,6 +7,7 @@
 #pragma once
 
 #include "typedef.hpp"
+#include <cstdint>
 #include <deque>
 #include <random>
 #include <chrono>
@@ -30,6 +31,8 @@ typedef struct sampler_config_{
     int rep_penalty_window = 64;
     int freq_penalty_window = 64;  // Window size for frequency penalty
     int repeat_last_n = 64;
+    bool use_optimized_sampling = false;
+    uint64_t rng_seed = 0;
 } sampler_config;
 
 //typedef std::pair<float, int> logits_t;
@@ -68,12 +71,14 @@ public:
     
     std::mt19937_64 rng_;
     std::uniform_real_distribution<float> uniform_dist_;
+    bool use_optimized_sampling;
 
     /// \brief Constructor
     /// \param in_features the input features
     /// \param config the configuration
     Sampler(){};
     Sampler(int in_features, sampler_config& config);
+    void set_seed(uint64_t seed);
 
     /// \brief Reset the penalties
     /// \note The function will reset the penalties
