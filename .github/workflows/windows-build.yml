@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - windows_zip_workflow
     tags:
       - '*'
   pull_request:
