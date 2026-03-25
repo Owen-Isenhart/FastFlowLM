@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <deque>
 #include <random>
-#include <chrono>
 #include <unordered_map>
 
 /// \brief sampler config
@@ -68,15 +67,15 @@ public:
     size_t repeat_last_n;
     
     std::unordered_map<int, int> token_counts_sparse;
-    
-    std::mt19937_64 rng_;
-    std::uniform_real_distribution<float> uniform_dist_;
-    bool use_optimized_sampling;
+
+    std::mt19937_64 rng_{};
+    std::uniform_real_distribution<float> uniform_dist_{0.0f, 1.0f};
+    bool use_optimized_sampling = false;
 
     /// \brief Constructor
     /// \param in_features the input features
     /// \param config the configuration
-    Sampler(){};
+    Sampler() = default;
     Sampler(int in_features, sampler_config& config);
     void set_seed(uint64_t seed);
 

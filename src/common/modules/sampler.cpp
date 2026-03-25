@@ -10,6 +10,7 @@
 
 #include <deque>
 #include <algorithm>  // for std::sort
+#include <chrono>
 #include <cmath>      // for std::exp
 #include <limits>
 
@@ -120,14 +121,14 @@ void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshol
         kv.prob *= inv_sum;
     }
 
-    // Apply min_p filter
+    // Apply min_p filter using the same logit criterion as sampler_minp_apply().
     if (min_p_threshold > 0.0f && min_p_threshold <= 1.0f) {
-        float max_prob = this->top_k_logits[0].prob;
-        float min_prob_threshold = max_prob * min_p_threshold;
-        
+        float max_logit = this->top_k_logits[0].logits;
+        float min_logit_threshold = max_logit + std::log(min_p_threshold);
+
         int valid_count = 0;
         for (int i = 0; i < this->top_k_logits.size(); ++i) {
-            if (this->top_k_logits[i].prob >= min_prob_threshold) {
+            if (this->top_k_logits[i].logits >= min_logit_threshold) {
                 this->top_k_logits[valid_count] = this->top_k_logits[i];
                 valid_count++;
             }
@@ -151,7 +152,7 @@ void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshol
         }
     }
 
-    // enormalize after filtering
+    // renormalize after filtering
     if (top_p_threshold < 1.0f || (min_p_threshold > 0.0f && min_p_threshold <= 1.0f)) {
         double filtered_sum = 0.0;
         for (auto& kv : this->top_k_logits) {
@@ -324,13 +325,16 @@ void Sampler::ring_buffer_update(int sampled_index) {
 void Sampler::ring_buffer_update_sparse(int sampled_index) {
     if (this->repeat_last_n > 0) {
         this->token_history.push_back(sampled_index);
-        
+
+        // Keep legacy counters synchronized for compatibility with existing callers.
+        this->counters[sampled_index]++;
         this->token_counts_sparse[sampled_index]++;
 
         if (this->token_history.size() > this->repeat_last_n) {
             int oldest = this->token_history.front();
             this->token_history.pop_front();
-            
+
+            this->counters[oldest]--;
             if (--this->token_counts_sparse[oldest] <= 0) {
                 this->token_counts_sparse.erase(oldest);
             }
