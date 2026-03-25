@@ -25,17 +25,17 @@ jobs:
           fetch-tags: true
 
       - name: Configure CMake
-        shell: pwsh
+        shell: powershell
         run: |
           cmake --preset windows-default
 
       - name: Build
-        shell: pwsh
+        shell: powershell
         run: |
           cmake --build --preset windows-default --config Release --parallel
 
       - name: Package zip
-        shell: pwsh
+        shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
 
