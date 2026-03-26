@@ -31,6 +31,7 @@ typedef struct sampler_config_{
     int freq_penalty_window = 64;  // Window size for frequency penalty
     int repeat_last_n = 64;
     bool use_optimized_sampling = false;
+    bool has_rng_seed = false;
     uint64_t rng_seed = 0;
 } sampler_config;
 

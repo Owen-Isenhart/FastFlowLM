@@ -40,7 +40,7 @@ Sampler::Sampler(int in_features, sampler_config& config) {
 
     this->token_history.clear();
 
-    if (config.rng_seed != 0) {
+    if (config.has_rng_seed || config.rng_seed != 0) {
         rng_.seed(config.rng_seed);
     } else {
         auto seed = std::chrono::high_resolution_clock::now()
@@ -123,7 +123,6 @@ void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshol
 
     // Apply min_p filter using the same logit criterion as sampler_minp_apply().
     if (min_p_threshold > 0.0f && min_p_threshold <= 1.0f) {
-        float max_logit = this->top_k_logits[0].logits;
         float min_logit_threshold = max_logit + std::log(min_p_threshold);
 
         int valid_count = 0;
