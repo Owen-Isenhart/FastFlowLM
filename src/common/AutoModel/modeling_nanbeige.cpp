@@ -27,10 +27,10 @@ void Nanbeige::load_model(std::string model_path, json model_info, int default_c
     this->sampler.reset();
 
     sampler_config config;
-    config.top_k = 40;
-    config.top_p = 0.9;
-    config.min_p = 0.1;
-    config.temperature = 0.8;
+    config.top_k = 20;
+    config.top_p = 0.95;
+    config.min_p = 0.0;
+    config.temperature = 0.6;
 
     this->set_sampler(config);
     for (size_t i = 0; i < PROFILER_TYPE_NUM; i++) {
@@ -48,6 +48,19 @@ std::string Nanbeige::apply_chat_template(nlohmann::ordered_json& messages, nloh
     inputs.messages = messages;
     inputs.extra_context = this->extra_context;
     return this->chat_tmpl->apply(inputs);
+}
+
+std::string Nanbeige::nanbeige_filter(int token) {
+
+    std::string token_str = this->tokenizer->run_time_decoder(token);
+    // Nanbeige tokenizer encodes hex-unicode form 0x00-0xFF as <0xXX> from 3 to 258
+    if (token >= 3 && token <= 258){
+        char c;
+        sscanf(token_str.c_str(), "<0x%hhx>", &c);
+        token_str.resize(1);
+        token_str[0] = c;
+    }
+    return token_str;
 }
 
 bool Nanbeige::insert(chat_meta_info_t& meta_info, lm_uniform_input_t& input) {
@@ -101,7 +114,7 @@ std::string Nanbeige::generate(chat_meta_info_t& meta_info, int length_limit, st
     int last_sampled_token = this->last_token;
     this->token_history.push_back(this->last_token);
     if (this->is_normal_token(last_sampled_token) && last_sampled_token != -1){
-        std::string token_str = this->tokenizer->run_time_decoder(last_sampled_token);
+        std::string token_str = this->nanbeige_filter(last_sampled_token);
         result += token_str;
         os << token_str << std::flush;
 
@@ -138,11 +151,7 @@ std::string Nanbeige::generate(chat_meta_info_t& meta_info, int length_limit, st
 
         this->profiler_list[TKOEN_DECODE_TIME].start();
         if (this->is_normal_token(sampled_token)){ // filter out special tokens
-            std::string token_str = this->tokenizer->run_time_decoder(sampled_token);
-            // for some reason, the 13 is interperted as \n in nanbeige tokenizer, but not in llama tokenizer, we need to handle it manually here
-            if (sampled_token == 13){
-                token_str = "\n";
-            }
+            std::string token_str = this->nanbeige_filter(sampled_token);
             os << token_str << std::flush;
             result += token_str;
         }
@@ -184,7 +193,7 @@ std::string Nanbeige::generate_with_prompt(chat_meta_info_t& meta_info, lm_unifo
     int last_sampled_token = this->last_token;
     this->token_history.push_back(this->last_token);
     if (this->is_normal_token(last_sampled_token) && last_sampled_token != -1){
-        std::string token_str = this->tokenizer->run_time_decoder(last_sampled_token);
+        std::string token_str = this->nanbeige_filter(last_sampled_token);
         result += token_str;
         os << token_str << std::flush;
 
@@ -212,11 +221,7 @@ std::string Nanbeige::generate_with_prompt(chat_meta_info_t& meta_info, lm_unifo
 
         this->profiler_list[TKOEN_DECODE_TIME].start();
         if (this->is_normal_token(sampled_token)){ // filter out special tokens
-            std::string token_str = this->tokenizer->run_time_decoder(sampled_token);
-            // for some reason, the 13 is interperted as \n in nanbeige tokenizer, but not in llama tokenizer, we need to handle it manually here
-            if (sampled_token == 13){
-                token_str = "\n";
-            }
+            std::string token_str = this->nanbeige_filter(sampled_token);
             os << token_str << std::flush;
             result += token_str;
         }

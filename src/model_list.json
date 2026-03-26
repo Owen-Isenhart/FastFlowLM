@@ -8,8 +8,8 @@
                 "file_url": "https://huggingface.co/api/models/FastFlowLM/Nanbeige-3B-NPU2/tree/v0.9.21-merge-lm-head",
                 "modified_at": "2025-05-30T00:00:00Z",
                 "size": 1000000000,
-                "flm_min_version": "0.9.21",
-                "default_context_length": 131072,
+                "flm_min_version": "0.9.37",
+                "default_context_length": 8192,
                 "files": [
                     "config.json",
                     "model.q4nx",

@@ -13,6 +13,8 @@ class Nanbeige : public AutoModel {
 private:
     void setup_tokenizer(std::string model_path);
 
+    std::string nanbeige_filter(int token);
+
 public:
     Nanbeige(xrt::device* npu_device_inst);
 
