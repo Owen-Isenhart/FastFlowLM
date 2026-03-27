@@ -370,7 +370,7 @@ flm run qwen3.5:9b -r 1
 ```
 
 ```shell
-flm serve qwen3.5:b -r 1
+flm serve qwen3.5:9b -r 1
 ```
 
 The `-r` option determines image's height:

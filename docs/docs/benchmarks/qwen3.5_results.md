@@ -58,7 +58,7 @@ Prefill time-to-first-token (TTFT) for Qwen3.5-4B on NPU (FastFlowLM) with diffe
 |--------------|-----------|----------------:|------------------:|
 | Qwen3.5-2B  | NPU (FLM) |            2.4 |               4.8 |
 | Qwen3.5-4B  | NPU (FLM) |            3.7 |               7.5 |
-| Qwen3.5-8B  | NPU (FLM) |            4.8 |               9.6 |
+| Qwen3.5-9B  | NPU (FLM) |            4.8 |               9.6 |
 
 **High Resolution Images:**
 
@@ -66,6 +66,6 @@ Prefill time-to-first-token (TTFT) for Qwen3.5-4B on NPU (FastFlowLM) with diffe
 |--------------|-----------|---------------:|---------------:|
 | Qwen3.5-2B  | NPU (FLM) |           9.6 |             30.5 |
 | Qwen3.5-4B  | NPU (FLM) |           14.7 |             41.3 |
-| Qwen3.5-8B  | NPU (FLM) |           18.0 |             50.8 |
+| Qwen3.5-9B  | NPU (FLM) |           18.0 |             50.8 |
 
 > This test uses a short prompt: “Describe this image.”
