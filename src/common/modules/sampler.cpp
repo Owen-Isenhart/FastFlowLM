@@ -121,22 +121,8 @@ void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshol
         kv.prob *= inv_sum;
     }
 
-    // Apply min_p filter using the same logit criterion as sampler_minp_apply().
-    if (min_p_threshold > 0.0f && min_p_threshold <= 1.0f) {
-        float min_logit_threshold = max_logit + std::log(min_p_threshold);
-
-        int valid_count = 0;
-        for (int i = 0; i < this->top_k_logits.size(); ++i) {
-            if (this->top_k_logits[i].logits >= min_logit_threshold) {
-                this->top_k_logits[valid_count] = this->top_k_logits[i];
-                valid_count++;
-            }
-        }
-        this->top_k_logits.resize(valid_count);
-    }
-
     // Apply top_p filter (cumulative probability threshold)
-    if (top_p_threshold < 1.0f && top_p_threshold > 0.0f) {
+    if (top_p_threshold < 1.0f) {
         float cum = 0.0f;
         int last_idx = 0;
         for (int i = 0; i < this->top_k_logits.size(); ++i) {
@@ -149,6 +135,20 @@ void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshol
         if (last_idx < this->top_k_logits.size()) {
             this->top_k_logits.resize(last_idx);
         }
+    }
+
+    // Apply min_p filter using the same logit criterion as sampler_minp_apply().
+    if (min_p_threshold > 0.0f && min_p_threshold <= 1.0f) {
+        float min_logit_threshold = max_logit + std::log(min_p_threshold);
+
+        int valid_count = 0;
+        for (int i = 0; i < this->top_k_logits.size(); ++i) {
+            if (this->top_k_logits[i].logits >= min_logit_threshold) {
+                this->top_k_logits[valid_count] = this->top_k_logits[i];
+                valid_count++;
+            }
+        }
+        this->top_k_logits.resize(valid_count);
     }
 
     // renormalize after filtering
@@ -373,8 +373,9 @@ int Sampler::sample(buffer<bf16>& x) {
     sampler_penalty_apply_sparse();
     sampler_topk_apply(this->top_k);
     if (this->use_optimized_sampling) {
-        sampler_temp_apply(this->temperature);
         softmax_with_topp_minp(this->top_p, this->min_p);
+        sampler_temp_apply(this->temperature);
+        softmax_inplace();
     } else {
         // Legacy behavior is kept as the default for output compatibility.
         softmax_inplace();
