@@ -173,7 +173,6 @@ std::string Nanbeige::generate(chat_meta_info_t& meta_info, int length_limit, st
     if (this->total_tokens >= this->MAX_L){
         header_print("WARNING", "Max length reached, stopping generation...");
     }
-    header_print("Nanbeige", result);
     return result;
 }
 
