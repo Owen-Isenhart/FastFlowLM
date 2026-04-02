@@ -27,6 +27,8 @@ void Qwen3_5VL::load_model(std::string model_path, json model_info, int default_
     this->setup_tokenizer(model_path);
     this->sampler.reset();
 
+    this->enable_tool = (model_info["size"] > 800000000)? true : false;
+
     sampler_config config;
     config.top_k = 20;
     config.top_p = 0.8;
@@ -52,7 +54,7 @@ std::string Qwen3_5VL::apply_chat_template(nlohmann::ordered_json& messages, nlo
     inputs.messages = messages;
     inputs.extra_context = this->extra_context;
     inputs.extra_context["enable_thinking"] = this->enable_think;
-    if (!tools.empty())
+    if (!tools.empty() && this->enable_tool)
         inputs.tools = tools;
     return this->chat_tmpl->apply(inputs);
 }

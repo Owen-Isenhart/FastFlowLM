@@ -25,7 +25,7 @@ class Qwen3_5VL : public AutoModel {
 private:
 
     bool enable_think = false;
-    // bool enable_tool = false;
+    bool enable_tool = false;
     void setup_tokenizer(std::string model_path);
     
     // Image processing functionality
