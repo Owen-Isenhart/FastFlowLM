@@ -35,7 +35,7 @@ sections:
     title: "Hardware + runtime expertise"
     people:
       - name: "Tao Wei"
-        role: "Co-Founder, Chief Architect, and COO"
+        role: "Co-Founder"
         image: "/assets/weitao.jpg"
         bio: |
           Professor of Electrical & Computer Engineering · Clemson University. Leads the NEXT Lab focused on domain-specific accelerators, reconfigurable computing, and applied ML.
@@ -46,7 +46,7 @@ sections:
           # - label: "Scholar"
           #   url: "https://scholar.google.com/citations?user=SsgrItsAAAAJ&hl=en"
       - name: "Ken Qing Yang"
-        role: "Co-Founder and CEO"
+        role: "Co-Founder"
         image: "/assets/kenqingyang.png"
         bio: |
           Distinguished Engineering Professor · University of Rhode Island. With more than 30 years of experience in computer architecture and parallel processing, he is a serial entrepreneur who has successfully built four high-tech startups rooted in his research innovations—including VeloBit (acquired by Western Digital) and DapuStor (currently in the IPO process). 
@@ -58,7 +58,7 @@ sections:
           - label: "DapuStor"
             url: "https://en.dapustor.com/"
       - name: "Zhenyu (Alfred) Xu"
-        role: "Co-Founder and CTO"    
+        role: "Co-founder"
         image: "/assets/zhenyu.png"
         bio: |
           Research Assistant Professor · Clemson University. Focused on domain-specific accelerator design, reconfigurable computing, and efficient on-device AI inference.
@@ -89,5 +89,4 @@ sections:
           style: ghost
           external: true
 ---
-
 

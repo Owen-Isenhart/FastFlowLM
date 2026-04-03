@@ -4,11 +4,15 @@
 
 AppName=flm
 
-AppVersion=0.9.35
+AppVersion=0.9.38
 
 AppPublisher=FastFlowLM
 
 AppPublisherURL=www.fastflowlm.com
+
+; DefaultDirName={localappdata}\flm
+; PrivilegesRequired=lowest
+; PrivilegesRequiredOverridesAllowed=dialog
 
 DefaultDirName={pf64}\flm
 
@@ -58,6 +62,7 @@ Source: "qwen2vl_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "qwen3_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "qwen3vl_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "qwen3_5vl_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "nanbeige_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lm_head.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dequant.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "whisper_npu.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -228,7 +233,7 @@ begin
   end
   else begin
     // FLM_MODEL_PATH doesn't exist, use default userdocs location
-    Result := ExpandConstant('{userdocs}\flm');
+    Result := GetEnv('USERPROFILE') + '\.flm';
   end;
 end;
 
