@@ -240,7 +240,8 @@ void RestHandler::ensure_asr_model_loaded(const std::string& model_tag) {
     std::string ensure_tag = model_tag;
     if (!downloader.is_model_downloaded(ensure_tag)) {
         if (!downloader.pull_model(ensure_tag)) {
-            header_print("WARNING", "Failed to download ASR model: " + ensure_tag);
+            header_print("ERROR", "Failed to download ASR model: " + ensure_tag);
+            return;
         }
     }
     this->whisper_engine = std::make_unique<Whisper>(&this->npu_device_inst);
@@ -265,7 +266,8 @@ void RestHandler::ensure_embed_model_loaded(const std::string& model_tag) {
     std::string ensure_tag = model_tag;
     if (!this->downloader.is_model_downloaded(ensure_tag)) {
         if (!this->downloader.pull_model(ensure_tag)) {
-            header_print("WARNING", "Failed to download embedding model: " + ensure_tag);
+            header_print("ERROR", "Failed to download embedding model: " + ensure_tag);
+            return;
         }
     }
     auto [embedding_model_tag, auto_embedding_engine] = get_auto_embedding_model(ensure_tag, &this->npu_device_inst);
