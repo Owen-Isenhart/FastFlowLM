@@ -618,7 +618,7 @@ bool WebServer::handle_request(http::request<http::string_body>& req,
     // Route lookup
     std::string key = std::string(req.method_string()) + " " + std::string(req.target());
     auto it = routes.find(key);
-    if (it == routes.end()) {
+    if (it == routes.end()) [[unlikely]] {
         // No route: respond 404 synchronously.
         res.result(http::status::not_found);
         res.body() = json{ {"error", "Not Found"} }.dump();

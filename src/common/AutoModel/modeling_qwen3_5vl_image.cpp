@@ -208,13 +208,13 @@ void Qwen3_5VL::preprocess_image(qwen3_5vl_image_t& image, std::vector<bf16> &pi
     
     // Replicate first frame for temporal patches (optimized for QWEN3_5_TEMPORAL_PATCH_SIZE = 2)
     // This is more efficient than a loop for the common case
-    if  (lm_engine_qwen3_5_ptr->QWEN3_5_TEMPORAL_PATCH_SIZE == 2) {
+    if  (lm_engine_qwen3_5_ptr->QWEN3_5_TEMPORAL_PATCH_SIZE == 2) [[likely]] {
         memcpy(
             patch_vector_scratch.data() + single_frame_size,
             patch_vector_scratch.data(),
             single_frame_size * sizeof(float)
         );
-    } else {
+    } else [[unlikely]] {
         // Generic loop for other TEMPORAL_PATCH_SIZE values
         for(unsigned l = 1; l < lm_engine_qwen3_5_ptr->QWEN3_5_TEMPORAL_PATCH_SIZE; l++){
             memcpy(
