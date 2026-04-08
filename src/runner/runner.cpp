@@ -51,7 +51,10 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
         // load asr model
         std::string whisper_tag = "whisper-v3:turbo";
         if (!this->downloader.is_model_downloaded(whisper_tag)) {
-            this->downloader.pull_model(whisper_tag);
+            if (!this->downloader.pull_model(whisper_tag)) {
+                header_print("ERROR", "Failed to download ASR model: " + whisper_tag);
+                exit(EXIT_FAILURE);
+            }
         }
         this->whisper_engine = std::make_unique<Whisper>(&this->npu_device_inst);
         auto [new_whisper_tag, whisper_model_info] = this->supported_models.get_model_info(whisper_tag);
@@ -85,7 +88,10 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
     
     this->tag = auto_model.first;
     if (!this->downloader.is_model_downloaded(this->tag)) {
-        this->downloader.pull_model(this->tag);
+        if (!this->downloader.pull_model(this->tag)) {
+            header_print("ERROR", "Failed to download model: " + this->tag);
+            exit(EXIT_FAILURE);
+        }
     }
     auto [new_tag, model_info] = this->supported_models.get_model_info(this->tag);
     this->auto_chat_engine->configure_parameter("img_pre_resize", this->img_pre_resize);
@@ -217,7 +223,9 @@ void Runner::run() {
             }
             else if (first_token == "/pull") {
                 std::string model_name = input_list[1];
-                this->downloader.pull_model(model_name);
+                if (!this->downloader.pull_model(model_name)) {
+                    std::cout << "Failed to download model: " << model_name << std::endl;
+                }
             }
         } else {
             // This is a regular message, not a command
@@ -385,7 +393,10 @@ void Runner::cmd_load(std::vector<std::string>& input_list) {
         this->tag = model_name;
 
         if (!this->downloader.is_model_downloaded(this->tag)) {
-            this->downloader.pull_model(this->tag);
+            if (!this->downloader.pull_model(this->tag)) {
+                std::cout << "Failed to download model: " << this->tag << std::endl;
+                return;
+            }
         }
         auto_chat_engine.reset();
         if(model_name=="gpt-oss:20b")

@@ -646,7 +646,10 @@ int main(int argc, char* argv[]) {
         }
         else if (parsed_args.command == "remove") {
             // Remove the model, this will be used to remove the model
-            downloader.remove_model(parsed_args.model_tag);
+            if (!downloader.remove_model(parsed_args.model_tag)) {
+                header_print("ERROR", "Failed to remove model: " + parsed_args.model_tag);
+                return 1;
+            }
         }
         else if (parsed_args.command == "list") {
             // List the models, this will be used to list the models

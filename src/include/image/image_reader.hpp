@@ -37,18 +37,18 @@ public:
 	explicit ImageReader(size_t max_cached_per_size = 16);
 	~ImageReader();
 
-	bool load_image(const std::string& filename, image_data_t& out_image);
-	bool load_image_base64(const std::string& base64_string, image_data_t& out_image);
-	bool resize_image(const image_data_t& input, int target_width, int target_height, image_data_t& output);
-	bool reorder_hwc_to_chw(const image_data_t& input, image_data_t& output);
-	bool save_png(const std::string& filename, const image_data_t& image);
+	[[nodiscard]] bool load_image(const std::string& filename, image_data_t& out_image);
+	[[nodiscard]] bool load_image_base64(const std::string& base64_string, image_data_t& out_image);
+	[[nodiscard]] bool resize_image(const image_data_t& input, int target_width, int target_height, image_data_t& output);
+	[[nodiscard]] bool reorder_hwc_to_chw(const image_data_t& input, image_data_t& output);
+	[[nodiscard]] bool save_png(const std::string& filename, const image_data_t& image);
 
 	void recycle(image_data_t& image);
 
 private:
-	static void initialize_ffmpeg();
-	static bool parse_image_header(const uint8_t* data, size_t size, int& codec_id);
-	bool decode_bytes(const uint8_t* data, size_t size, image_data_t& out_image);
+	static void initialize_ffmpeg() noexcept;
+	[[nodiscard]] static bool parse_image_header(std::span<const uint8_t> data, int& codec_id) noexcept;
+	[[nodiscard]] bool decode_bytes(std::span<const uint8_t> data, image_data_t& out_image);
 	bool ensure_decode_resources(int codec_id);
 	void reset_decode_resources();
 

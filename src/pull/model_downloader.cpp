@@ -27,7 +27,9 @@ bool ModelDownloader::is_model_downloaded(const std::string& model_tag, bool sub
         if (!check_model_compatibility(model_tag, sub_process_mode)) {
             if (!sub_process_mode)
                 header_print("FLM", "Model is not compatible with the current FLM version. ");
-            remove_model(model_tag, sub_process_mode);
+            if (!remove_model(model_tag, sub_process_mode)) {
+                header_print("WARNING", "Failed to remove incompatible model: " + model_tag);
+            }
             return false;
         }
     }
@@ -96,7 +98,9 @@ bool ModelDownloader::pull_model(const std::string& model_tag, bool force_redown
 
         // If force, remove the model first
         if (force_redownload) {
-            remove_model(new_model_tag);
+            if (!remove_model(new_model_tag)) {
+                header_print("WARNING", "Failed to remove model before re-download: " + new_model_tag);
+            }
         }
         
         // Get missing files
