@@ -29,10 +29,11 @@ extern "C" {
 
 namespace {
 static uint32_t read_be32(const uint8_t* ptr) {
-    return (static_cast<uint32_t>(ptr[0]) << 24) |
+    uint32_t val = (static_cast<uint32_t>(ptr[0]) << 24) |
            (static_cast<uint32_t>(ptr[1]) << 16) |
            (static_cast<uint32_t>(ptr[2]) << 8) |
            static_cast<uint32_t>(ptr[3]);
+    return val;
 }
 
 static bool has_valid_png_structure(const uint8_t* data, size_t size) {
