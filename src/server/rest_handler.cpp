@@ -210,7 +210,8 @@ bool RestHandler::ensure_model_loaded(const std::string& model_tag) {
         ensure_tag = auto_model.first;
         if (!downloader.is_model_downloaded(ensure_tag)) {
             if (!downloader.pull_model(ensure_tag)) {
-                header_print("WARNING", "Failed to download model: " + ensure_tag);
+                header_print("ERROR", "Failed to download model: " + ensure_tag);
+                return false;
             }
         }
         auto [new_ensure_tag, model_info] = supported_models.get_model_info(ensure_tag);

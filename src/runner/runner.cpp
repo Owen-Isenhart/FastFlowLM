@@ -53,7 +53,7 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
         if (!this->downloader.is_model_downloaded(whisper_tag)) {
             if (!this->downloader.pull_model(whisper_tag)) {
                 header_print("ERROR", "Failed to download ASR model: " + whisper_tag);
-                exit(EXIT_FAILURE);
+                throw std::runtime_error("Failed to download ASR model: " + whisper_tag);
             }
         }
         this->whisper_engine = std::make_unique<Whisper>(&this->npu_device_inst);
@@ -64,7 +64,7 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
         }
         catch (const std::exception& e) {
             header_print("ERROR", "Failed to load ASR model: " + std::string(e.what()));
-            exit(EXIT_FAILURE);
+            throw std::runtime_error("Failed to load ASR model: " + std::string(e.what()));
         }
     }
 #else
@@ -90,7 +90,7 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
     if (!this->downloader.is_model_downloaded(this->tag)) {
         if (!this->downloader.pull_model(this->tag)) {
             header_print("ERROR", "Failed to download model: " + this->tag);
-            exit(EXIT_FAILURE);
+            throw std::runtime_error("Failed to download model: " + this->tag);
         }
     }
     auto [new_tag, model_info] = this->supported_models.get_model_info(this->tag);
@@ -100,7 +100,7 @@ Runner::Runner(model_list& supported_models, ModelDownloader& downloader, progra
     }
     catch (const std::exception& e) {
         header_print("ERROR", "Failed to load model: " + std::string(e.what()));
-        exit(EXIT_FAILURE);
+        throw std::runtime_error("Failed to load model: " + std::string(e.what()));
     }
 
     this->generate_limit = -1;
