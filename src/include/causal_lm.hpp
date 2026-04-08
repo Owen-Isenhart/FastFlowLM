@@ -5,6 +5,9 @@
 /// \version 0.9.10
 /// \note This class is a virtual class for causal language models
 /// \note All other models should inherit from this class so that they can be used in the same way.
+/// \warning ABI-BREAKING CHANGE: The prefill() signature has been updated for const-correctness.
+///          All dependent shared libraries (e.g., qwen3_npu, qwen2_npu, etc.) must be rebuilt
+///          as vtable layout changes will cause runtime failures with prebuilt binaries.
 #pragma once
 #include "tensor_utils/q4_npu_eXpress.hpp"
 #include "tensor_2d.hpp"

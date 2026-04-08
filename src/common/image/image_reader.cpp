@@ -105,7 +105,7 @@ static bool has_valid_jpeg_structure(std::span<const uint8_t> data) {
 
     bool found_eoi = false;
 
-    for (size_t i = data.size(); i-- > 2; ) {
+    for (size_t i = data.size() - 2; i >= 2; --i) {
         if (data[i] == 0xFF && data[i + 1] == 0xD9) {
             found_eoi = true;
             break;

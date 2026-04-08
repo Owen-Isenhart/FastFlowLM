@@ -222,9 +222,13 @@ void Runner::run() {
                 std::cout << std::endl;
             }
             else if (first_token == "/pull") {
-                std::string model_name = input_list[1];
-                if (!this->downloader.pull_model(model_name)) {
-                    std::cout << "Failed to download model: " << model_name << std::endl;
+                if (input_list.size() < 2) {
+                    std::cout << "Usage: /pull <model_name>" << std::endl;
+                } else {
+                    std::string model_name = input_list[1];
+                    if (!this->downloader.pull_model(model_name)) {
+                        std::cout << "Failed to download model: " << model_name << std::endl;
+                    }
                 }
             }
         } else {

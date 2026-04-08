@@ -1,10 +1,13 @@
-/// \file causal_lm.hpp
-/// \brief causal_lm class
+/// \file embedding_model.hpp
+/// \brief embedding_model class
 /// \author FastFlowLM Team
 /// \date 2025-06-24
 /// \version 0.9.10
-/// \note This class is a virtual class for causal language models
-/// \note All other models should inherit from this class so that they can be used in the same way.
+/// \note This class is a virtual class for embedding models
+/// \note All other embedding models should inherit from this class so that they can be used in the same way.
+/// \warning ABI-BREAKING CHANGE: The embed() signature has been updated for const-correctness (std::vector<int>& to const std::vector<int>&).
+///          All dependent shared libraries (e.g., gemma_embedding, etc.) must be rebuilt
+///          as vtable layout changes will cause runtime failures with prebuilt binaries.
 #pragma once
 #include "tensor_utils/q4_npu_eXpress.hpp"
 #include "tensor_2d.hpp"
