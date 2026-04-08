@@ -233,10 +233,18 @@ public:
     }
 
     size_t size() const noexcept { return size_; }
-    uint8_t* data() const noexcept { return data_; }
-    uint8_t* bdata() const noexcept { return data_; }
-    uint8_t* begin() const noexcept { return data_; }
-    uint8_t* end() const noexcept { return data_ + size_; }
+    
+    // Non-const overloads for mutable access
+    uint8_t* data() noexcept { return data_; }
+    uint8_t* bdata() noexcept { return data_; }
+    uint8_t* begin() noexcept { return data_; }
+    uint8_t* end() noexcept { return data_ + size_; }
+    
+    // Const overloads for const-correctness
+    const uint8_t* data() const noexcept { return data_; }
+    const uint8_t* bdata() const noexcept { return data_; }
+    const uint8_t* begin() const noexcept { return data_; }
+    const uint8_t* end() const noexcept { return data_ + size_; }
 
     /// \brief copy from
     /// \param src the source
