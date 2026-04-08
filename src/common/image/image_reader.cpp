@@ -16,6 +16,7 @@
 #include <cstring>
 #include <sstream>
 #include <mutex>
+#include <span>
 #include "utils/debug_utils.hpp"
 // FFmpeg includes for image processing only
 extern "C" {
@@ -30,19 +31,29 @@ extern "C" {
 namespace {
 static uint32_t read_be32(const uint8_t* ptr) {
     uint32_t val = (static_cast<uint32_t>(ptr[0]) << 24) |
-           (static_cast<uint32_t>(ptr[1]) << 16) |
-           (static_cast<uint32_t>(ptr[2]) << 8) |
-           static_cast<uint32_t>(ptr[3]);
+                   (static_cast<uint32_t>(ptr[1]) << 16) |
+                   (static_cast<uint32_t>(ptr[2]) << 8) |
+                   static_cast<uint32_t>(ptr[3]);
     return val;
 }
 
-static bool has_valid_png_structure(const uint8_t* data, size_t size) {
-    if (!data || size < 8) {
+// Compile-time PNG signature verification
+consteval bool verify_png_signature() {
+    constexpr uint8_t kPngSig[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    // Verify signature is correctly defined
+    return kPngSig[0] == 0x89 && kPngSig[1] == 0x50 && kPngSig[2] == 0x4E && kPngSig[3] == 0x47 &&
+           kPngSig[4] == 0x0D && kPngSig[5] == 0x0A && kPngSig[6] == 0x1A && kPngSig[7] == 0x0A;
+}
+
+static_assert(verify_png_signature(), "PNG signature validation failed at compile-time");
+
+static bool has_valid_png_structure(std::span<const uint8_t> data) {
+    if (data.size() < 8) {
         return false;
     }
 
-    static const uint8_t kPngSig[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-    if (std::memcmp(data, kPngSig, sizeof(kPngSig)) != 0) {
+    static constinit const uint8_t kPngSig[8] = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+    if (std::memcmp(data.data(), kPngSig, sizeof(kPngSig)) != 0) {
         return false;
     }
 
@@ -50,12 +61,12 @@ static bool has_valid_png_structure(const uint8_t* data, size_t size) {
     bool saw_ihdr = false;
     bool saw_iend = false;
 
-    while (offset + 12 <= size) {
-        const uint32_t chunk_len = read_be32(data + offset);
-        const uint8_t* chunk_type = data + offset + 4;
+    while (offset + 12 <= data.size()) {
+        const uint32_t chunk_len = read_be32(data.data() + offset);
+        const uint8_t* chunk_type = data.data() + offset + 4;
         const size_t full_chunk = static_cast<size_t>(chunk_len) + 12;
 
-        if (offset + full_chunk > size) {
+        if (offset + full_chunk > data.size()) {
             return false;
         }
 
@@ -74,7 +85,7 @@ static bool has_valid_png_structure(const uint8_t* data, size_t size) {
                 return false;
             }
             saw_iend = true;
-            return offset + full_chunk == size;
+            return offset + full_chunk == data.size();
         }
 
         offset += full_chunk;
@@ -83,8 +94,8 @@ static bool has_valid_png_structure(const uint8_t* data, size_t size) {
     return false;
 }
 
-static bool has_valid_jpeg_structure(const uint8_t* data, size_t size) {
-    if (!data || size < 4) {
+static bool has_valid_jpeg_structure(std::span<const uint8_t> data) {
+    if (data.size() < 4) {
         return false;
     }
 
@@ -94,7 +105,7 @@ static bool has_valid_jpeg_structure(const uint8_t* data, size_t size) {
 
     bool found_eoi = false;
 
-    for (size_t i = size - 2; i >= 2; --i) {
+    for (size_t i = data.size() - 2; i >= 2; --i) {
         if (data[i] == 0xFF && data[i + 1] == 0xD9) {
             found_eoi = true;
             break;
@@ -107,22 +118,22 @@ static bool has_valid_jpeg_structure(const uint8_t* data, size_t size) {
 
     bool saw_sos = false;
     size_t pos = 2;
-    while (pos + 1 < size) {
+    while (pos + 1 < data.size()) {
         if (data[pos] != 0xFF) {
             ++pos;
             continue;
         }
 
-        while (pos < size && data[pos] == 0xFF) {
+        while (pos < data.size() && data[pos] == 0xFF) {
             ++pos;
         }
-        if (pos >= size) {
+        if (pos >= data.size()) {
             return false;
         }
 
         const uint8_t marker = data[pos++];
         if (marker == 0xD9) {
-            return saw_sos && (pos == size);
+            return saw_sos && (pos == data.size());
         }
 
         if (marker == 0xDA) {
@@ -134,7 +145,7 @@ static bool has_valid_jpeg_structure(const uint8_t* data, size_t size) {
             continue;
         }
 
-        if (pos + 1 >= size) {
+        if (pos + 1 >= data.size()) {
             return false;
         }
 
@@ -149,16 +160,16 @@ static bool has_valid_jpeg_structure(const uint8_t* data, size_t size) {
     return false;
 }
 
-static bool has_basic_image_integrity(const uint8_t* data, size_t size, int codec_id) {
-    if (!data || size == 0) {
+static bool has_basic_image_integrity(std::span<const uint8_t> data, int codec_id) {
+    if (data.empty()) {
         return false;
     }
 
     if (codec_id == AV_CODEC_ID_PNG) {
-        return has_valid_png_structure(data, size);
+        return has_valid_png_structure(data);
     }
     if (codec_id == AV_CODEC_ID_MJPEG) {
-        return has_valid_jpeg_structure(data, size);
+        return has_valid_jpeg_structure(data);
     }
     return false;
 }
@@ -203,14 +214,14 @@ ImageMemoryPool::ImageMemoryPool(size_t max_cached_per_size)
 }
 
 namespace {
-static size_t round_up_to(size_t value, size_t alignment) {
+constexpr static size_t round_up_to(size_t value, size_t alignment) {
     if (alignment == 0) {
         return value;
     }
     return ((value + alignment - 1) / alignment) * alignment;
 }
 
-static size_t bucket_size_for_image(size_t requested_size) {
+constexpr static size_t bucket_size_for_image(size_t requested_size) {
     if (requested_size <= 64 * 1024) {
         return round_up_to(requested_size, 4 * 1024);
     }
@@ -343,14 +354,14 @@ void ImageReader::reset_decode_resources() {
     cached_codec_id_ = -1;
 }
 
-void ImageReader::initialize_ffmpeg() {
+void ImageReader::initialize_ffmpeg() noexcept {
     static std::once_flag init_once;
     std::call_once(init_once, []() {});
 }
 
-bool ImageReader::parse_image_header(const uint8_t* data, size_t size, int& codec_id) {
+bool ImageReader::parse_image_header(std::span<const uint8_t> data, int& codec_id) noexcept {
     codec_id = AV_CODEC_ID_NONE;
-    if (!data || size < 8) {
+    if (data.size() < 8) {
         return false;
     }
 
@@ -365,15 +376,15 @@ bool ImageReader::parse_image_header(const uint8_t* data, size_t size, int& code
     return false;
 }
 
-bool ImageReader::decode_bytes(const uint8_t* data, size_t size, image_data_t& out_image) {
+bool ImageReader::decode_bytes(std::span<const uint8_t> data, image_data_t& out_image) {
     int codec_id = AV_CODEC_ID_NONE;
-    // header_print_g("DEBUG", "Decoding image of size: " << std::to_string(size) << " bytes");
-    if (!parse_image_header(data, size, codec_id)) {
+    // header_print_g("DEBUG", "Decoding image of size: " << std::to_string(data.size()) << " bytes");
+    if (!parse_image_header(data, codec_id)) {
         std::cerr << "Error: Unsupported image format (only JPEG/JPG and PNG supported)" << std::endl;
         return false;
     }
 
-    if (!has_basic_image_integrity(data, size, codec_id)) {
+    if (!has_basic_image_integrity(data, codec_id)) {
         std::cerr << "Error: Image payload failed integrity check" << std::endl;
         return false;
     }
@@ -391,8 +402,8 @@ bool ImageReader::decode_bytes(const uint8_t* data, size_t size, image_data_t& o
         av_frame_unref(rgb_frame_);
         av_packet_unref(packet_);
 
-        packet_->data = const_cast<uint8_t*>(data);
-        packet_->size = static_cast<int>(size);
+        packet_->data = const_cast<uint8_t*>(data.data());
+        packet_->size = static_cast<int>(data.size());
 
         if (avcodec_send_packet(codec_ctx_, packet_) < 0) {
             std::cerr << "Error: Could not send packet for decoding" << std::endl;
@@ -543,7 +554,7 @@ bool ImageReader::load_image(const std::string& filename, image_data_t& out_imag
         return false;
     }
 
-    return decode_bytes(data.data(), data.size(), out_image);
+    return decode_bytes(std::span<const uint8_t>(data.data(), data.size()), out_image);
 }
 
 bool ImageReader::load_image_base64(const std::string& base64_string, image_data_t& out_image) {
@@ -561,7 +572,7 @@ bool ImageReader::load_image_base64(const std::string& base64_string, image_data
         return false;
     }
 
-    return decode_bytes(reinterpret_cast<const uint8_t*>(decoded.data()), decoded.size(), out_image);
+    return decode_bytes(std::span<const uint8_t>(reinterpret_cast<const uint8_t*>(decoded.data()), decoded.size()), out_image);
 }
 
 bool ImageReader::resize_image(const image_data_t& input, int target_width, int target_height, image_data_t& output) {

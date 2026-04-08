@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <unordered_map>
 #include <mutex>
+#include <span>
 #include "typedef.hpp"
 #include "buffer.hpp"
 
