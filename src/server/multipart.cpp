@@ -11,8 +11,8 @@
 
 ///@brief multipart/form-data request parser
 ///@return parts of multipart/form-data
-std::map<std::string, MultipartPart> parse_multipart(const http::request<http::string_body>& req) {
-    std::map<std::string, MultipartPart> parts;
+std::unordered_map<std::string, MultipartPart> parse_multipart(const http::request<http::string_body>& req) {
+    std::unordered_map<std::string, MultipartPart> parts;
 
     // 1. Extract the boundary from the Content-Type header
     std::string content_type_header = std::string(req[http::field::content_type]);

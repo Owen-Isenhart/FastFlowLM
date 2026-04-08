@@ -977,7 +977,7 @@ std::unique_ptr<WebServer> create_lm_server(model_list& models, ModelDownloader&
             std::function<void(const json&, bool)> send_streaming_response,
             std::shared_ptr<HttpSession> session,
             std::shared_ptr<CancellationToken> cancellation_token) {
-                std::map<std::string, MultipartPart> parts = parse_multipart(req);
+                std::unordered_map<std::string, MultipartPart> parts = parse_multipart(req);
                 json request_json;
                 request_json["model"] = parts["model"].content;
                 request_json["file"] = parts["file"].content;
