@@ -232,11 +232,11 @@ public:
         return data_[index];
     }
 
-    size_t size() const { return size_; }
-    uint8_t* data() const { return data_; }
-    uint8_t* bdata() const { return data_; }
-    uint8_t* begin() const { return data_; }
-    uint8_t* end() const { return data_ + size_; }
+    size_t size() const noexcept { return size_; }
+    uint8_t* data() const noexcept { return data_; }
+    uint8_t* bdata() const noexcept { return data_; }
+    uint8_t* begin() const noexcept { return data_; }
+    uint8_t* end() const noexcept { return data_ + size_; }
 
     /// \brief copy from
     /// \param src the source

@@ -72,7 +72,7 @@ typedef enum {
 	TOOL_DETECTED
 } stop_reason_t;
 
-inline std::string stop_reason_to_string(stop_reason_t reason){
+	inline std::string stop_reason_to_string(stop_reason_t reason) noexcept {
     switch (reason){
         case EOT_DETECTED:
             return "stop";
@@ -196,7 +196,7 @@ public:
 
 	/// \brief Get the current model
 	/// \return the current model
-	std::string get_current_model();
+	std::string get_current_model() noexcept;
 
 	/// \brief Get the current context length
 	/// \return the current context length
@@ -212,7 +212,7 @@ public:
 
 	/// \brief Get the max length
 	/// \return the max length
-	unsigned int get_max_length() const { return MAX_L; }
+	unsigned int get_max_length() const noexcept { return MAX_L; }
 
 	/// \brief Show the model info
 	/// \return the model info

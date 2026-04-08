@@ -25,7 +25,7 @@ public:
     /// \brief prefill the causal_lm
     /// \param ids the ids
     /// \return the output
-    virtual buffer<bf16> prefill(std::vector<int>& ids, void* payload = nullptr) = 0;
+    virtual buffer<bf16> prefill(const std::vector<int>& ids, void* payload = nullptr) = 0;
 
     /// \brief set the context length
     /// \param L the context length

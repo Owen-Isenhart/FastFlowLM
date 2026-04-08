@@ -35,7 +35,7 @@ public:
     /// \brief embed the gemma_embedding
     /// \param tokens the tokens
     /// \return the output tensor
-    buffer<bf16> embed(std::vector<int>& tokens) override;
+    buffer<bf16> embed(const std::vector<int>& tokens) override;
 
 private:
     struct Impl;

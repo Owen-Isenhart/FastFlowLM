@@ -78,7 +78,7 @@ void AutoEmbeddingModel::_shared_load_model(std::string model_path, json model_i
     this->q4nx.reset();
 }
 
-buffer<bf16> AutoEmbeddingModel::_shared_embed(std::vector<int>& tokens) {
+buffer<bf16> AutoEmbeddingModel::_shared_embed(const std::vector<int>& tokens) {
     buffer<bf16> y = this->embedding_model_impl->embed(tokens);
     return y;
 }
