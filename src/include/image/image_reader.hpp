@@ -29,7 +29,7 @@ public:
 private:
 	size_t max_cached_per_size_;
 	std::unordered_map<size_t, std::vector<bytes>> free_lists_;
-	std::mutex mutex_;
+	alignas(64) std::mutex mutex_;  // cache-line aligned to prevent false sharing under contention
 };
 
 class ImageReader {
