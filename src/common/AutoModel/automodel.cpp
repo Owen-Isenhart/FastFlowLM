@@ -22,7 +22,7 @@ AutoModel::AutoModel(xrt::device* npu_device_inst, std::string current_model) {
 }
 
 
-std::string AutoModel::get_current_model() noexcept {
+std::string AutoModel::get_current_model() {
     return this->current_model;
 }
 

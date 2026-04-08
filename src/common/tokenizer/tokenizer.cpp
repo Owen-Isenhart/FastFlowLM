@@ -105,7 +105,7 @@ std::string Tokenizer::cpt_to_utf8(const std::string& input) {
     }
     while (i < input.size()) {
         unsigned char c = input[i];
-        uint32_t cp;
+        uint32_t cp = 0;  // Initialize to avoid undefined behavior in error path
         size_t width;
 
         // --- Decode a UTF-8 codepoint ---

@@ -196,7 +196,7 @@ public:
 
 	/// \brief Get the current model
 	/// \return the current model
-	std::string get_current_model() noexcept;
+	std::string get_current_model();
 
 	/// \brief Get the current context length
 	/// \return the current context length
