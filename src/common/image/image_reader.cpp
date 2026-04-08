@@ -607,13 +607,13 @@ bool ImageReader::resize_image(const image_data_t& input, int target_width, int 
         return false;
     }
 
-    uint8_t* src_data[4] = { input.pixels.data(), nullptr, nullptr, nullptr };
+    const uint8_t* src_data[4] = { input.pixels.data(), nullptr, nullptr, nullptr };
     int src_linesize[4] = { input.width * 3, 0, 0, 0 };
     uint8_t* dst_data[4] = { out_buffer.data(), nullptr, nullptr, nullptr };
     int dst_linesize[4] = { target_width * 3, 0, 0, 0 };
 
     bool ok = sws_scale(sws_ctx,
-                        src_data,
+                        const_cast<uint8_t* const*>(src_data),
                         src_linesize,
                         0,
                         input.height,
