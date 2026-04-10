@@ -72,12 +72,12 @@ void Sampler::reset_penalties() {
 }
 
 void Sampler::softmax_inplace() {
-    if (this->top_k_logits.empty()) 
+    if (this->top_k_logits.empty()) [[unlikely]]
         return;
 
     float max_l = this->top_k_logits[0].logits;
     for (int i = 1; i < this->top_k_logits.size(); ++i) {
-        if (this->top_k_logits[i].logits > max_l) {
+        if (this->top_k_logits[i].logits > max_l) [[likely]] {
             max_l = this->top_k_logits[i].logits;
         }
     }
@@ -96,13 +96,13 @@ void Sampler::softmax_inplace() {
 }
 
 void Sampler::softmax_with_topp_minp(float top_p_threshold, float min_p_threshold) {
-    if (this->top_k_logits.empty())
+    if (this->top_k_logits.empty()) [[unlikely]]
         return;
 
     // Find max for numerical stability
     float max_logit = this->top_k_logits[0].logits;
     for (int i = 1; i < this->top_k_logits.size(); ++i) {
-        if (this->top_k_logits[i].logits > max_logit) {
+        if (this->top_k_logits[i].logits > max_logit) [[likely]] {
             max_logit = this->top_k_logits[i].logits;
         }
     }
@@ -176,7 +176,7 @@ void Sampler::sampler_penalty_apply() {
     // Apply frequency and presence penalties
     for (int token_id = 0; token_id < in_features; token_id++) {
         int count = this->counters[token_id];
-        if (count <= 0) {
+        if (count <= 0) [[unlikely]] {
             continue; 
         }
         assert(count > 0 && count <= this->repeat_last_n);
@@ -201,7 +201,7 @@ void Sampler::sampler_penalty_apply_sparse() {
     }
 
     for (auto const& [token_id, count] : this->token_counts_sparse) {
-        if (count <= 0) continue;
+        if (count <= 0) [[unlikely]] continue;
 
         if (this->logits[token_id] <= 0.0f) {
             this->logits[token_id] *= this->rep_penalty;

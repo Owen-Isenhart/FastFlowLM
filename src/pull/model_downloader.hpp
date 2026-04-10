@@ -20,10 +20,10 @@ public:
     ModelDownloader(model_list& models);
     
     // Check if model is already downloaded
-    bool is_model_downloaded(const std::string& model_tag, bool sub_process_mode=0);
+    [[nodiscard]] bool is_model_downloaded(const std::string& model_tag, bool sub_process_mode=0);
     
     // Download model files if not present
-    bool pull_model(const std::string& model_tag, bool force_redownload = false);
+    [[nodiscard]] bool pull_model(const std::string& model_tag, bool force_redownload = false);
     
     // Get list of missing files for a model
     std::vector<std::string> get_missing_files(const std::string& model_tag);
@@ -32,7 +32,7 @@ public:
     std::vector<std::string> get_present_files(const std::string& model_tag);
     
     // Remove a model and all its files
-    bool remove_model(const std::string& model_tag, bool sub_process_mode=0);
+    [[nodiscard]] bool remove_model(const std::string& model_tag, bool sub_process_mode=0);
     
     // Get download progress callback
     std::function<void(size_t, size_t)> get_progress_callback();

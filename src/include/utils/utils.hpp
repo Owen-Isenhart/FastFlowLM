@@ -29,7 +29,7 @@ typedef std::pair<float, std::string> time_with_unit;
 
 /// \brief now
 /// \return the current time
-inline time_point now(){
+inline time_point now() noexcept {
     return std::chrono::high_resolution_clock::now();
 }
 

@@ -141,7 +141,7 @@ private:
     ///@brief acceptor
     tcp::acceptor acceptor;
     ///@brief routes
-    std::map<std::string, RequestHandler> routes;
+    std::unordered_map<std::string, RequestHandler> routes;
     ///@brief running
     bool running;
     ///@brief port

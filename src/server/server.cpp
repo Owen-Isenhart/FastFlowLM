@@ -618,7 +618,7 @@ bool WebServer::handle_request(http::request<http::string_body>& req,
     // Route lookup
     std::string key = std::string(req.method_string()) + " " + std::string(req.target());
     auto it = routes.find(key);
-    if (it == routes.end()) {
+    if (it == routes.end()) [[unlikely]] {
         // No route: respond 404 synchronously.
         res.result(http::status::not_found);
         res.body() = json{ {"error", "Not Found"} }.dump();
@@ -977,7 +977,7 @@ std::unique_ptr<WebServer> create_lm_server(model_list& models, ModelDownloader&
             std::function<void(const json&, bool)> send_streaming_response,
             std::shared_ptr<HttpSession> session,
             std::shared_ptr<CancellationToken> cancellation_token) {
-                std::map<std::string, MultipartPart> parts = parse_multipart(req);
+                std::unordered_map<std::string, MultipartPart> parts = parse_multipart(req);
                 json request_json;
                 request_json["model"] = parts["model"].content;
                 request_json["file"] = parts["file"].content;

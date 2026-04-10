@@ -103,36 +103,37 @@ std::string Tokenizer::cpt_to_utf8(const std::string& input) {
     }
     while (i < input.size()) {
         unsigned char c = input[i];
-        uint32_t cp;
+        uint32_t cp = 0;  // Initialize to avoid undefined behavior in error path
         size_t width;
 
         // --- Decode a UTF-8 codepoint ---
-        if (c < 0x80) {
+        // Single-byte ASCII (0x00-0x7F) is most common in typical English text
+        if (c < 0x80) [[likely]] {
             cp = c;
             width = 1;
         }
-        else if ((c & 0xE0) == 0xC0) {
-            if (i + 1 >= input.size()) throw std::runtime_error("Truncated UTF-8, ll = 2");
+        else if ((c & 0xE0) == 0xC0) [[unlikely]] {
+            if (i + 1 >= input.size()) [[unlikely]] throw std::runtime_error("Truncated UTF-8, ll = 2");
             cp  = (uint32_t)(c     & 0x1F) << 6;
             cp |= (uint32_t)(input[i+1] & 0x3F);
             width = 2;
         }
-        else if ((c & 0xF0) == 0xE0) {
-            if (i + 2 >= input.size()) throw std::runtime_error("Truncated UTF-8, ll = 3");
+        else if ((c & 0xF0) == 0xE0) [[unlikely]] {
+            if (i + 2 >= input.size()) [[unlikely]] throw std::runtime_error("Truncated UTF-8, ll = 3");
             cp  = (uint32_t)(c     & 0x0F) << 12;
             cp |= (uint32_t)(input[i+1] & 0x3F) << 6;
             cp |= (uint32_t)(input[i+2] & 0x3F);
             width = 3;
         }
         else if ((c & 0xF8) == 0xF0) {
-            if (i + 3 >= input.size()) throw std::runtime_error("Truncated UTF-8, ll = 4");
+            if (i + 3 >= input.size()) [[unlikely]] throw std::runtime_error("Truncated UTF-8, ll = 4");
             cp  = (uint32_t)(c     & 0x07) << 18;
             cp |= (uint32_t)(input[i+1] & 0x3F) << 12;
             cp |= (uint32_t)(input[i+2] & 0x3F) << 6;
             cp |= (uint32_t)(input[i+3] & 0x3F);
             width = 4;
         }
-        else {
+        else [[unlikely]] {
             std::cout << std::hex <<"cp: " << cp << std::endl;
             throw std::runtime_error("Invalid UTF-8 byte");
         }
