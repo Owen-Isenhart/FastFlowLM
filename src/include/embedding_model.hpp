@@ -25,5 +25,5 @@ public:
     /// \brief embed the embedding_model
     /// \param x the input
     /// \return the output
-    virtual buffer<bf16> embed(const std::vector<int>& tokens) = 0;
+    virtual buffer<bf16> embed(std::vector<int>& tokens) = 0;
 };

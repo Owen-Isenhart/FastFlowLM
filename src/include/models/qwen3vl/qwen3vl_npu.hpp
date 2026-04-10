@@ -67,7 +67,7 @@ public:
     /// \param ids the ids
     /// \return the output tensor
     buffer<bf16> forward(int ids) override;
-    buffer<bf16> prefill(const std::vector<int>& ids, void* payload = nullptr) override;
+    buffer<bf16> prefill(std::vector<int>& ids, void* payload = nullptr) override;
 
     /// \brief set the context length
     /// \param L the context length

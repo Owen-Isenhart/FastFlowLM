@@ -63,7 +63,7 @@ protected:
 	void _shared_load_model(std::string model_path, json model_info, bool enable_preemption = false);
 	nlohmann::json _shared_setup_tokenizer(std::string model_path);
 
-	buffer<bf16> _shared_embed(const std::vector<int>& tokens);
+	buffer<bf16> _shared_embed(std::vector<int>& tokens);
 
 public:
 	//************ Shared by all models *************/
