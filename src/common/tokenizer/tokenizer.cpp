@@ -16,17 +16,15 @@
 /// \param model_path the model path
 Tokenizer::Tokenizer(const std::string& model_path) {
     #ifdef _WIN32
-    std::string full_path = model_path + "\\tokenizer.json";
-    std::ifstream fs(full_path, std::ios::in | std::ios::binary);
+    std::ifstream fs(model_path + "\\tokenizer.json", std::ios::in | std::ios::binary);
     #else
-    std::string full_path = model_path + "/tokenizer.json";
-    std::ifstream fs(full_path, std::ios::in | std::ios::binary);
+    std::ifstream fs(model_path + "/tokenizer.json", std::ios::in | std::ios::binary);
     #endif
     if (fs.fail()) {
         #ifdef _WIN32
-        std::cerr << "Cannot open " << model_path << "\\tokenizer.json" << std::endl;
+        std::cerr << "Cannot open " << model_path + "\\tokenizer.json" << std::endl;
         #else
-        std::cerr << "Cannot open " << model_path << "/tokenizer.json" << std::endl;
+        std::cerr << "Cannot open " << model_path + "/tokenizer.json" << std::endl;
         #endif
         exit(1);
     }

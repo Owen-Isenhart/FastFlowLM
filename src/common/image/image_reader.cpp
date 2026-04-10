@@ -30,11 +30,10 @@ extern "C" {
 
 namespace {
 static uint32_t read_be32(const uint8_t* ptr) {
-    uint32_t val = (static_cast<uint32_t>(ptr[0]) << 24) |
-                   (static_cast<uint32_t>(ptr[1]) << 16) |
-                   (static_cast<uint32_t>(ptr[2]) << 8) |
-                   static_cast<uint32_t>(ptr[3]);
-    return val;
+    return (static_cast<uint32_t>(ptr[0]) << 24) |
+           (static_cast<uint32_t>(ptr[1]) << 16) |
+           (static_cast<uint32_t>(ptr[2]) << 8) |
+           static_cast<uint32_t>(ptr[3]);
 }
 
 // Compile-time PNG signature verification

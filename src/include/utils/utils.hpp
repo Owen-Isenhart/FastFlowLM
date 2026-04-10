@@ -37,7 +37,7 @@ inline time_point now() noexcept {
 /// \param start the start time
 /// \param stop the stop time
 /// \return the duration in nanoseconds
-inline time_with_unit duration_ns(time_point start, time_point stop) {
+inline time_with_unit duration_ns(time_point start, time_point stop){
     return std::make_pair(std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count(), "ns");
 }
 
@@ -45,7 +45,7 @@ inline time_with_unit duration_ns(time_point start, time_point stop) {
 /// \param start the start time
 /// \param stop the stop time
 /// \return the duration in microseconds
-inline time_with_unit duration_us(time_point start, time_point stop) {
+inline time_with_unit duration_us(time_point start, time_point stop){
     return std::make_pair(std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count(), "us");
 }
 
@@ -53,7 +53,7 @@ inline time_with_unit duration_us(time_point start, time_point stop) {
 /// \param start the start time
 /// \param stop the stop time
 /// \return the duration in milliseconds
-inline time_with_unit duration_ms(time_point start, time_point stop) {
+inline time_with_unit duration_ms(time_point start, time_point stop){
     return std::make_pair(std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count(), "ms");
 }
 
@@ -61,7 +61,7 @@ inline time_with_unit duration_ms(time_point start, time_point stop) {
 /// \param start the start time
 /// \param stop the stop time
 /// \return the duration in seconds
-inline time_with_unit duration_s(time_point start, time_point stop) {
+inline time_with_unit duration_s(time_point start, time_point stop){
     return std::make_pair(std::chrono::duration_cast<std::chrono::seconds>(stop - start).count(), "s");
 }
 
